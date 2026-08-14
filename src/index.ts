@@ -62,7 +62,7 @@ connectDatabase();
 app.get("/api/health", (req, res) => {
   const dbState = mongoose.connection.readyState;
   let dbStatusStr = "unknown";
-  
+
   switch (dbState) {
     case 0:
       dbStatusStr = "disconnected";
@@ -98,13 +98,13 @@ initSocket(server);
 // App Listener
 server.listen(PORT, () => {
   console.log(`========================================`);
-  console.log(` Capricorn Energy Ltd Backend API initialized!`);
+  console.log(` New Energy Ltd Backend API initialized!`);
   console.log(` Status: ACTIVE`);
   console.log(` Port: ${PORT}`);
   console.log(` Environment: development`);
   console.log(` Health Gateway: http://localhost:${PORT}/api/health`);
   console.log(`========================================`);
-  
+
   // Start the Active Deposit scheduler after database and server are live
   startActiveDepositScheduler();
 

@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { seedPlans } from "../utils/planSeeder";
+import { seedFaqs } from "../utils/faqSeeder";
+import { seedTemplates } from "../utils/templateSeeder";
 
 // Ensure environment variables are loaded
 dotenv.config();
@@ -16,6 +19,11 @@ export async function connectDatabase(): Promise<void> {
     console.log("Connecting to MongoDB Atlas...");
     await mongoose.connect(MONGODB_URI);
     console.log("✓ Connected to MongoDB Atlas successfully!");
+
+    // Auto-seed investment plans, FAQs, and email/notification templates if empty
+    await seedPlans();
+    await seedFaqs();
+    await seedTemplates();
   } catch (error) {
     console.error("✗ MongoDB Atlas connection failure:", error);
     // Do not crash the entire server immediately, but log failure telemetry

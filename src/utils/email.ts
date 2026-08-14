@@ -21,15 +21,29 @@ function createTransporter() {
 }
 
 /**
- * Fetches the company name from the admin Settings document.
- * Falls back to EMAIL_FROM_NAME env var or "Capricorn Energy".
+ * Fetches company settings from the admin Setting document.
+ * Formats the domain URL and returns company name and the full path to EnergyDarkLogo.png.
  */
-async function getCompanyName(): Promise<string> {
+async function getCompanyDetails(): Promise<{ companyName: string; logoUrl: string }> {
+  let companyName = process.env.EMAIL_FROM_NAME || "New Energy Holdings";
+  let domainName = "localhost:3000";
+
   try {
     const setting = await Setting.findOne({});
-    if (setting?.companyName) return setting.companyName;
+    if (setting?.companyName) companyName = setting.companyName.trim();
+    if (setting?.domainName) domainName = setting.domainName.trim();
   } catch (_) {}
-  return process.env.EMAIL_FROM_NAME || "Capricorn Energy";
+
+  let baseUrl = domainName;
+  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    const isLocal = baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1");
+    baseUrl = `${isLocal ? "http" : "https"}://${baseUrl}`;
+  }
+  baseUrl = baseUrl.replace(/\/+$/, "");
+
+  const logoUrl = `${baseUrl}/EnergyDarkLogo.png`;
+
+  return { companyName, logoUrl };
 }
 
 /**
@@ -64,7 +78,7 @@ export async function sendDirectEmail(params: {
 
   if (isEmailSuppressed(`direct → ${to}`)) return;
 
-  const companyName = await getCompanyName();
+  const { companyName, logoUrl } = await getCompanyDetails();
   const fromName = process.env.EMAIL_FROM_NAME || companyName;
   const fromAddress = process.env.EMAIL_FROM_ADDRESS || "";
 
@@ -79,6 +93,7 @@ export async function sendDirectEmail(params: {
     greeting: compiledGreeting,
     content: compiledContent,
     companyName,
+    logoUrl,
   });
 
   try {
@@ -115,7 +130,7 @@ export async function sendTemplatedEmail(params: {
       return;
     }
 
-    const companyName = await getCompanyName();
+    const { companyName, logoUrl } = await getCompanyDetails();
     const allVars = { username, companyName, ...variables };
 
     let subject = compileTemplate(fallbackSubject, allVars);
@@ -131,7 +146,7 @@ export async function sendTemplatedEmail(params: {
       bannerUrl = template.banner || undefined;
     }
 
-    const html = buildEmailHtml({ title: subject, greeting, content, bannerUrl, companyName });
+    const html = buildEmailHtml({ title: subject, greeting, content, bannerUrl, companyName, logoUrl });
     const fromName = process.env.EMAIL_FROM_NAME || companyName;
     const fromAddress = process.env.EMAIL_FROM_ADDRESS || "";
 
