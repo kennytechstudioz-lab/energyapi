@@ -90,7 +90,7 @@ const server = (0, http_1.createServer)(app);
 // App Listener
 server.listen(PORT, () => {
     console.log(`========================================`);
-    console.log(` Capricorn Energy Ltd Backend API initialized!`);
+    console.log(` New Energy Ltd Backend API initialized!`);
     console.log(` Status: ACTIVE`);
     console.log(` Port: ${PORT}`);
     console.log(` Environment: development`);

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildEmailHtml = buildEmailHtml;
 function buildEmailHtml(opts) {
-    const { logoUrl, bannerUrl, title, greeting, content, companyName = process.env.EMAIL_FROM_NAME || "Capricorn Energy", companyEmail = process.env.EMAIL_FROM_ADDRESS || "", year = new Date().getFullYear(), } = opts;
+    const { logoUrl, bannerUrl, title, greeting, content, companyName = process.env.EMAIL_FROM_NAME || "New Sky Energy", companyEmail = process.env.EMAIL_FROM_ADDRESS || "", year = new Date().getFullYear(), } = opts;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +12,7 @@ function buildEmailHtml(opts) {
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #f0f2f5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; }
-    a { color: #c8a70e; text-decoration: none; }
+    a { color: #009ADE; text-decoration: none; }
     p { margin: 0 0 16px 0; }
     ul, ol { padding-left: 20px; margin: 0 0 16px 0; }
     li { margin-bottom: 6px; }
@@ -29,8 +29,8 @@ function buildEmailHtml(opts) {
           <tr>
             <td align="center" style="background:#0d0e12; padding: 28px 40px;">
               ${logoUrl
-        ? `<img src="${logoUrl}" alt="${companyName}" style="height:48px; max-width:220px; object-fit:contain;" />`
-        : `<span style="font-size:22px; font-weight:900; color:#e4c126; letter-spacing:1px;">${companyName}</span>`}
+        ? `<img src="${logoUrl}" alt="${companyName}" style="height:52px; max-width:240px; object-fit:contain; display:block;" />`
+        : `<span style="font-size:22px; font-weight:900; color:#009ADE; letter-spacing:1px;">${companyName}</span>`}
             </td>
           </tr>
 
@@ -44,7 +44,7 @@ function buildEmailHtml(opts) {
 
           <!-- TITLE ROW -->
           <tr>
-            <td align="center" style="background:#0d0e12; border-top: 3px solid #e4c126; padding: 24px 40px 20px;">
+            <td align="center" style="background:#0d0e12; border-top: 3px solid #009ADE; padding: 24px 40px 20px;">
               <h1 style="font-size:22px; font-weight:900; color:#ffffff; letter-spacing:0.5px; line-height:1.3;">${title}</h1>
             </td>
           </tr>
@@ -76,7 +76,7 @@ function buildEmailHtml(opts) {
             <td align="center" style="padding: 28px 40px 36px; background:#f8f8f8;">
               <p style="font-size:13px; color:#888888; line-height:1.6; margin:0;">
                 You are receiving this email because you have an account with <strong style="color:#555;">${companyName}</strong>.<br/>
-                ${companyEmail ? `Questions? Contact us at <a href="mailto:${companyEmail}" style="color:#c8a70e;">${companyEmail}</a>.<br/>` : ""}
+                ${companyEmail ? `Questions? Contact us at <a href="mailto:${companyEmail}" style="color:#009ADE;">${companyEmail}</a>.<br/>` : ""}
               </p>
               <p style="font-size:11px; color:#aaaaaa; margin-top:16px;">
                 &copy; ${year} ${companyName}. All rights reserved.

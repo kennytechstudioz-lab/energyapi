@@ -26,17 +26,28 @@ function createTransporter() {
     });
 }
 /**
- * Fetches the company name from the admin Settings document.
- * Falls back to EMAIL_FROM_NAME env var or "Capricorn Energy".
+ * Fetches company settings from the admin Setting document.
+ * Formats the domain URL and returns company name and the full path to EnergyDarkLogo.png.
  */
-async function getCompanyName() {
+async function getCompanyDetails() {
+    let companyName = process.env.EMAIL_FROM_NAME || "New Energy Holdings";
+    let domainName = "localhost:3000";
     try {
         const setting = await Setting_1.default.findOne({});
         if (setting?.companyName)
-            return setting.companyName;
+            companyName = setting.companyName.trim();
+        if (setting?.domainName)
+            domainName = setting.domainName.trim();
     }
     catch (_) { }
-    return process.env.EMAIL_FROM_NAME || "Capricorn Energy";
+    let baseUrl = domainName;
+    if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+        const isLocal = baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1");
+        baseUrl = `${isLocal ? "http" : "https"}://${baseUrl}`;
+    }
+    baseUrl = baseUrl.replace(/\/+$/, "");
+    const logoUrl = `${baseUrl}/EnergyDarkLogo.png`;
+    return { companyName, logoUrl };
 }
 /**
  * Returns true if email sending should be suppressed.
@@ -63,7 +74,7 @@ async function sendDirectEmail(params) {
     const { to, subject, greeting, content } = params;
     if (isEmailSuppressed(`direct → ${to}`))
         return;
-    const companyName = await getCompanyName();
+    const { companyName, logoUrl } = await getCompanyDetails();
     const fromName = process.env.EMAIL_FROM_NAME || companyName;
     const fromAddress = process.env.EMAIL_FROM_ADDRESS || "";
     // Replace {{companyName}} in subject, greeting, and content
@@ -76,6 +87,7 @@ async function sendDirectEmail(params) {
         greeting: compiledGreeting,
         content: compiledContent,
         companyName,
+        logoUrl,
     });
     try {
         const transporter = createTransporter();
@@ -102,7 +114,7 @@ async function sendTemplatedEmail(params) {
             console.warn(`[Email] No email found for username "${username}" — skipping ${templateName}`);
             return;
         }
-        const companyName = await getCompanyName();
+        const { companyName, logoUrl } = await getCompanyDetails();
         const allVars = { username, companyName, ...variables };
         let subject = (0, notifications_1.compileTemplate)(fallbackSubject, allVars);
         let greeting = (0, notifications_1.compileTemplate)(fallbackGreeting, allVars);
@@ -115,7 +127,7 @@ async function sendTemplatedEmail(params) {
             content = (0, notifications_1.compileTemplate)(template.content, allVars);
             bannerUrl = template.banner || undefined;
         }
-        const html = (0, emailLayout_1.buildEmailHtml)({ title: subject, greeting, content, bannerUrl, companyName });
+        const html = (0, emailLayout_1.buildEmailHtml)({ title: subject, greeting, content, bannerUrl, companyName, logoUrl });
         const fromName = process.env.EMAIL_FROM_NAME || companyName;
         const fromAddress = process.env.EMAIL_FROM_ADDRESS || "";
         const transporter = createTransporter();

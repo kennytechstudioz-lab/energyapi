@@ -170,9 +170,9 @@ async function registerUser(req, res) {
             username: cleanUsername,
             templateName: "registration_successful",
             variables: { username: cleanUsername },
-            fallbackSubject: "Welcome to Capricorn Energy",
+            fallbackSubject: "Welcome to New Sky Energy",
             fallbackGreeting: `Hi ${cleanUsername},`,
-            fallbackContent: `Your account has been successfully created on Capricorn Energy. You can now log in and start exploring our clean energy investment plans.`,
+            fallbackContent: `Your account has been successfully created on New Sky Energy. You can now log in and start exploring our clean energy investment plans.`,
         }).catch((err) => console.error("[Email] Registration welcome email failed:", err));
         return res.status(201).json({
             success: true,
@@ -244,9 +244,9 @@ async function loginUser(req, res) {
                 username: user.username,
                 templateName: "two_factor_auth",
                 variables: { otp },
-                fallbackSubject: "Your 2FA Login Code — Capricorn Energy Ltd",
+                fallbackSubject: "Your 2FA Login Code — New Sky Energy",
                 fallbackGreeting: `Hi ${user.username},`,
-                fallbackContent: `Your two-factor authentication code is: <strong style="font-size:28px; color:#e4c126; letter-spacing:8px;">${otp}</strong><br/><br/>This code expires in 10 minutes. Do not share it with anyone.`,
+                fallbackContent: `Your two-factor authentication code is: <strong style="font-size:28px; color:#009ADE; letter-spacing:8px;">${otp}</strong><br/><br/>This code expires in 10 minutes. Do not share it with anyone.`,
             }).catch((err) => console.error("[2FA] Email send error:", err));
             return res.status(200).json({
                 success: true,
@@ -715,20 +715,20 @@ async function updateUserProfile(req, res) {
                 await (0, notifications_1.sendTemplatedNotification)({
                     username: user.username,
                     templateName: "verification_processing",
-                    variables: { username: user.username, company_name: "Capricorn Energy" },
+                    variables: { username: user.username, company_name: "New Sky Energy" },
                     notifyAdmin: true,
                     adminTitle: `KYC Submitted — @${user.username}`,
                     adminContent: `User @${user.username} has submitted their KYC verification details and is awaiting review.`,
                     fallbackTitle: "Verification Under Review",
-                    fallbackContent: `Hello ${user.username}, thanks for the effort of verifying your Capricorn Energy account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
+                    fallbackContent: `Hello ${user.username}, thanks for verifying your New Sky Energy account. Your verification is currently under review by our compliance team and will take up to 24 hours to complete. You will be notified upon approval.`,
                 });
                 await (0, email_1.sendTemplatedEmail)({
                     username: user.username,
                     templateName: "verification_processing",
-                    variables: { username: user.username, company_name: "Capricorn Energy" },
+                    variables: { username: user.username, company_name: "New Sky Energy" },
                     fallbackSubject: "Verification Under Review",
                     fallbackGreeting: `Hello ${user.username},`,
-                    fallbackContent: `Thanks for the effort of verifying your <strong>Capricorn Energy</strong> account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
+                    fallbackContent: `Thanks for verifying your <strong>New Sky Energy</strong> account. Your verification is currently under review by our compliance team and will take up to 24 hours to complete. You will be notified upon approval.`,
                 });
             }
             catch (notifErr) {
@@ -1191,7 +1191,7 @@ async function updateTransactionStatusByAdmin(req, res) {
             });
         }
         else if (transaction.transactionType === "deposit" && status === "rejected") {
-            // Dispatch rejected notification
+            // Dispatch rejected notification & email
             try {
                 await (0, notifications_1.sendTemplatedNotification)({
                     username: transaction.username,
@@ -1205,9 +1205,17 @@ async function updateTransactionStatusByAdmin(req, res) {
                     fallbackTitle: "Deposit Rejected",
                     fallbackContent: "Hello {{username}}, your deposit of ${{amount}} worth of {{currency}} was rejected. Please contact support.",
                 });
+                await (0, email_1.sendTemplatedEmail)({
+                    username: transaction.username,
+                    templateName: "deposit_rejected",
+                    variables: { amount: transaction.amount, currency: transaction.currencySymbol },
+                    fallbackSubject: "Deposit Request Declined",
+                    fallbackGreeting: `Hi ${transaction.username},`,
+                    fallbackContent: `Your deposit request of <strong>$${transaction.amount}</strong> worth of <strong>${transaction.currencySymbol}</strong> was declined. Please contact support if you require assistance.`,
+                });
             }
             catch (err) {
-                console.error("✗ Failed to dispatch deposit_rejected notification:", err);
+                console.error("✗ Failed to dispatch deposit_rejected notification/email:", err);
             }
         }
         else if (transaction.transactionType === "capital_access" && status === "completed") {
@@ -1266,9 +1274,17 @@ async function updateTransactionStatusByAdmin(req, res) {
                     fallbackTitle: "Funding Rejected",
                     fallbackContent: "Hello {{username}}, your funding request of ${{amount}} worth of {{currency}} was rejected. Please contact support.",
                 });
+                await (0, email_1.sendTemplatedEmail)({
+                    username: transaction.username,
+                    templateName: "deposit_rejected",
+                    variables: { amount: transaction.amount, currency: transaction.currencySymbol },
+                    fallbackSubject: "Funding Request Declined",
+                    fallbackGreeting: `Hi ${transaction.username},`,
+                    fallbackContent: `Your funding request of <strong>$${transaction.amount}</strong> worth of <strong>${transaction.currencySymbol}</strong> was declined. Please contact support if you require assistance.`,
+                });
             }
             catch (err) {
-                console.error("✗ Failed to dispatch funding_rejected notification:", err);
+                console.error("✗ Failed to dispatch funding_rejected notification/email:", err);
             }
         }
         else if (transaction.transactionType === "withdrawal" && status === "completed") {
@@ -1481,9 +1497,9 @@ async function adminBulkEmail(req, res) {
             username: String(username).toLowerCase().trim(),
             templateName: String(templateName),
             variables: {},
-            fallbackSubject: "Message from Capricorn Energy",
+            fallbackSubject: "Message from New Sky Energy",
             fallbackGreeting: `Hello {{username}},`,
-            fallbackContent: "You have a new message from the Capricorn Energy team.",
+            fallbackContent: "You have a new message from the New Sky Energy team.",
         })));
         const sent = results.filter((r) => r.status === "fulfilled").length;
         return res.status(200).json({ success: true, message: `Email sent to ${sent} of ${usernames.length} user(s).` });
@@ -1726,6 +1742,17 @@ async function adminCreateTransaction(req, res) {
                 fallbackContent: `Hi {{username}}, you have received a bonus of ${{ amount }} worth of ${wallet.currencyName}`,
                 notifyAdmin: false,
             }).catch((err) => console.error("[Bonus] Notification failed:", err));
+            (0, email_1.sendTemplatedEmail)({
+                username: user.username,
+                templateName: "bonus",
+                variables: {
+                    amount: amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    currency: wallet.currencyName,
+                },
+                fallbackSubject: "Bonus Credit Received",
+                fallbackGreeting: `Hi ${user.username},`,
+                fallbackContent: `Congratulations! An administrative bonus credit of <strong>$${amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> worth of <strong>${wallet.currencyName}</strong> has been added to your account balance.`,
+            }).catch((err) => console.error("[Bonus] Email failed:", err));
         }
         if (isWithdrawal) {
             wallet.balance = (wallet.balance || 0) - amountNum;
@@ -1743,6 +1770,17 @@ async function adminCreateTransaction(req, res) {
                 fallbackTitle: "Withdrawal Approved",
                 fallbackContent: "Hello {{username}}, your withdrawal of ${{amount}} worth of {{currency}} is processed and approved.",
             }).catch((err) => console.error("[Withdrawal] Notification failed:", err));
+            (0, email_1.sendTemplatedEmail)({
+                username: user.username,
+                templateName: "withdrawal_approved",
+                variables: {
+                    amount: amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    currency: wallet.currencyName,
+                },
+                fallbackSubject: "Withdrawal Approved",
+                fallbackGreeting: `Hi ${user.username},`,
+                fallbackContent: `Your withdrawal of <strong>$${amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> worth of <strong>${wallet.currencyName}</strong> has been processed and approved.`,
+            }).catch((err) => console.error("[Withdrawal] Email failed:", err));
         }
         if (isDeposit) {
             if (isFromBalance) {
@@ -1849,7 +1887,7 @@ async function forgotPassword(req, res) {
             username: user.username,
             templateName: "forgot_password",
             variables: { otp },
-            fallbackSubject: "Your Password Reset Code — Capricorn Energy Ltd",
+            fallbackSubject: "Your Password Reset Code — New Sky Energy",
             fallbackGreeting: `Hi ${user.username},`,
             fallbackContent: `Your password reset code is: <strong style="font-size:28px; color:#e4c126; letter-spacing:8px;">${otp}</strong><br/><br/>This code expires in 15 minutes. Do not share it with anyone.`,
         }).catch((err) => console.error("[ForgotPassword] Email send error:", err));

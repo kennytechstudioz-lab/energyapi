@@ -5,17 +5,17 @@ const mongoose_1 = require("mongoose");
 const SettingSchema = new mongoose_1.Schema({
     companyName: {
         type: String,
-        default: "Capricorn Energy",
+        default: "New Sky Energy",
         trim: true,
     },
     domainName: {
         type: String,
-        default: "capricorn.com",
+        default: "newskyenergyholdings.com",
         trim: true,
     },
     email: {
         type: String,
-        default: "support@capricorn.com",
+        default: "support@newskyenergyholdings.com",
         trim: true,
     },
     phone: {
@@ -30,7 +30,7 @@ const SettingSchema = new mongoose_1.Schema({
     },
     description: {
         type: String,
-        default: "Capricorn Energy is a global leader in clean-energy investments, delivering sustainable and secured high-yield dividends.",
+        default: "New Sky Energy is a global leader in clean-energy investments, delivering sustainable and secured high-yield dividends.",
         trim: true,
     },
     showCurrency: {
