@@ -1723,7 +1723,7 @@ export async function requestCapitalAccess(req: Request, res: Response) {
       status: { $in: ["pending", "completed"] },
     });
     if (existingRequest) {
-      return res.status(400).json({ error: "You have already requested 300% Capital Access." });
+      return res.status(400).json({ error: "You have already requested 200% Capital Access." });
     }
 
     const wallet = await Wallet.findOne({

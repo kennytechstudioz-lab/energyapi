@@ -1624,7 +1624,7 @@ async function requestCapitalAccess(req, res) {
             status: { $in: ["pending", "completed"] },
         });
         if (existingRequest) {
-            return res.status(400).json({ error: "You have already requested 300% Capital Access." });
+            return res.status(400).json({ error: "You have already requested 200% Capital Access." });
         }
         const wallet = await Wallet_1.Wallet.findOne({
             username: user.username,
